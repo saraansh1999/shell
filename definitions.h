@@ -40,6 +40,10 @@ void remindme_command_execute(char** args);
 
 void clock_command_execute(char ** args);
 
+int redirect_to_file(char comm[],int out_red,int last_letter,int size);
+
+int close_redirection();
+
 void command_execute(char* comm,int bg,int size);
 
 void break_up_command(char* comm,int no_commands,int size);

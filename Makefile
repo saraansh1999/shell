@@ -4,6 +4,7 @@ shell : \
 			get_command.o \
 			break_up_command.o \
 			command_execute.o \
+			redirections.o \
 			cd_command_execute.o \
 			ls_command_execute.o \
 			pwd_command_execute.o \
@@ -37,6 +38,8 @@ break_up_command.o : definitions.h functions/break_up_command.c
 command_execute.o : definitions.h functions/command_execute.c
 		$(CC) -g -c functions/command_execute.c
 
+redirections.o : definitions.h functions/redirections.c
+		$(CC) -g -c functions/redirections.c
 
 cd_command_execute.o : definitions.h functions/cd_command_execute.c
 		$(CC) -g -c functions/cd_command_execute.c

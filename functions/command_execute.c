@@ -1,4 +1,4 @@
-#include<stdio.h>
+  #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
@@ -46,14 +46,39 @@ char** arg_break(char* comm,int bg,int size)
 void command_execute(char* comm,int bg,int size)
 {
 	char** args=(char**)malloc((size+5)*sizeof(char*));
-	int pid,i=0,j,status,wpid,len=strlen(comm);
+	int ret,fd,pid,i=0,j,status,wpid,len=strlen(comm),out_red=0,in_red=0,last_letter;
+
 	if(bg==1)
 	{
 		comm[--len]='\0';
 	}
-	args=arg_break(comm,bg,size);
+	last_letter=len;
+	for(i=0;comm[i]!='\0';i++)
+		if(comm[i]=='>')
+		{
+			if(comm[i-1]=='>')
+				out_red=2;
+			else
+			{
+				out_red=1;
+				last_letter=i;
+			}
+		}
+	
+	if(out_red)
+	{
+		ret=redirect_to_file(comm,out_red,last_letter,size);
+		if(ret)
+			return;
+	}
+
+	
 	char* command=(char*)malloc((size+5)*sizeof(char));
-	strcpy(command,comm);
+	for(i=0;i<last_letter;i++)
+		command[i]=comm[i];
+	command[i]='\0'	;
+	args=arg_break(command,bg,size);
+	
 
 	if(strncmp(command,"remindme",8)==0)
 		bg=1;
@@ -131,6 +156,13 @@ void command_execute(char* comm,int bg,int size)
 				}
 				printf("[%d]\n", pid);
 			}
+		}
+
+		if(out_red)
+		{
+			ret=close_redirection();
+			if(ret)
+				return;
 		}
 	}
 	
