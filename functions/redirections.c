@@ -12,7 +12,6 @@ int stdout_clone;
 int redirect_to_file(char comm[],int out_red,int last_letter,int size)
 {
 	int fd,i,c=0;
-	printf("%d\n",last_letter );
 	if(out_red)
 	{
 		char* file_name=(char*)malloc((size+5)*sizeof(char));
@@ -34,7 +33,6 @@ int redirect_to_file(char comm[],int out_red,int last_letter,int size)
 
 		if(out_red==1)
 		{
-			printf("%s\n",file_name );
 			fd=open(file_name,O_WRONLY | O_CREAT | O_TRUNC , 0644);
 		}
 		else
