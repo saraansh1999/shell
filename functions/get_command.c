@@ -24,6 +24,7 @@ extern int shell_id;
 
 void get_command()
 {
+
 	//printf("get enter\n");
 	int read_size=1005,i=0,no_commands=1;
 	char* command=(char*)malloc(read_size*sizeof(char));
@@ -53,7 +54,6 @@ void get_command()
 			command=realloc(command,read_size);
 		}
 	}
-	//printf("%d\n",read_size);
 	break_up_command(command,no_commands,read_size);
 	free(command);
 	return;

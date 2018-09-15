@@ -22,7 +22,7 @@ extern char delim[10];
 extern int shell_id;
 
 
-void system_command_execute(char** args)
+void system_command_execute(char** args,int red)
 {
 	execvp(args[0],args);
 	printf("ERROR in executing '%s' command\n",args[0]);

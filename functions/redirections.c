@@ -7,18 +7,15 @@
 
 
 int stdout_clone;
+int stdin_clone;
 
 
 int redirect_to_file(char comm[],int out_red,int last_letter,int size)
 {
-	int fd,i,c=0;
+	int fd,i=last_letter,c=0;
 	if(out_red)
 	{
 		char* file_name=(char*)malloc((size+5)*sizeof(char));
-		if(out_red==1)
-			i=last_letter+1;
-		else
-			i=last_letter+2;
 		for(;comm[i]!='\0';i++)
 		{
 			if(comm[i]==' ' || comm[i]=='\t' || comm[i]=='\v' || comm[i]=='\r' || comm[i]=='\n' || comm[i]=='\f' || comm[i]=='\a')
@@ -26,8 +23,11 @@ int redirect_to_file(char comm[],int out_red,int last_letter,int size)
 			else
 				break;
 		}
-		for(;comm[i]!='\0';i++)
+		for(;comm[i]!='\0' && !(comm[i]==' ' || comm[i]=='\t' || comm[i]=='\v' || comm[i]=='\r' || comm[i]=='\n' || comm[i]=='\f' || comm[i]=='\a');i++)
+		{
 			file_name[c++]=comm[i];
+			comm[i]=' ';
+		}
 
 		file_name[c]='\0';
 
@@ -44,10 +44,16 @@ int redirect_to_file(char comm[],int out_red,int last_letter,int size)
 			return 1;
 		}
 
-		if(dup2(1,stdout_clone)==-1)
+		/*if(dup2(1,stdout_clone)==-1)
 		{
 			printf("ERROR : Redirection Failed.\n");
 			return 1;	
+		}*/
+		stdout_clone=dup(1);
+		if(stdout_clone==-1)
+		{
+			printf("ERROR : Redirection Failed.\n");
+			return 1;
 		}
 
 		close(1);
@@ -64,9 +70,73 @@ int redirect_to_file(char comm[],int out_red,int last_letter,int size)
 	return 0;
 }
 
-int close_redirection()
+int redirect_from_file(char comm[],int last_letter,int size)
+{
+	int c=0,i,fd;
+	char* file_name=(char*)malloc((size+5)*sizeof(char));
+	i=last_letter;
+	for(;comm[i]!='\0';i++)
+	{
+		if(comm[i]==' ' || comm[i]=='\t' || comm[i]=='\v' || comm[i]=='\r' || comm[i]=='\n' || comm[i]=='\f' || comm[i]=='\a')
+			continue;
+		else
+			break;
+	}
+	for(;comm[i]!='\0' && !(comm[i]==' ' || comm[i]=='\t' || comm[i]=='\v' || comm[i]=='\r' || comm[i]=='\n' || comm[i]=='\f' || comm[i]=='\a');i++)
+	{
+		file_name[c++]=comm[i];
+		comm[i]=' ';
+	}
+
+	file_name[c]='\0';
+
+	fd=open(file_name, O_RDONLY);
+
+	if(fd==-1)
+	{
+		printf("ERROR : File not found.\n");
+		return 1;
+	}
+
+/*	if(dup2(0,stdin_clone)==-1)
+	{
+		printf("ERROR : Redirection Failed.\n");
+		return 1;
+	}*/
+	stdin_clone=dup(0);
+	if(stdin_clone==-1)
+	{
+		printf("ERROR : Redirection Failed.\n");
+		return 1;
+	}
+
+	close(0);
+
+	if(dup2(fd,0)==-1)
+	{
+		printf("ERROR : Redirection Failed.\n");
+		return 1;
+	}
+
+	close(fd);
+
+	return 0;
+
+}
+
+int close_redirection_out()
 {
 	if(dup2(stdout_clone,1)==-1)
+	{
+		printf("ERROR : Redirection Failed.\n");
+		return 1;
+	}
+	return 0;
+}
+
+int close_redirection_in()
+{
+	if(dup2(stdin_clone,0)==-1)
 	{
 		printf("ERROR : Redirection Failed.\n");
 		return 1;

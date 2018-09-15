@@ -46,39 +46,50 @@ char** arg_break(char* comm,int bg,int size)
 void command_execute(char* comm,int bg,int size)
 {
 	char** args=(char**)malloc((size+5)*sizeof(char*));
-	int ret,fd,pid,i=0,j,status,wpid,len=strlen(comm),out_red=0,in_red=0,last_letter;
+	int ret,fd,pid,i=0,j,status,wpid,len=strlen(comm),out_red=0,in_red=0,last_letter_in,last_letter_out;
 
 	if(bg==1)
 	{
 		comm[--len]='\0';
 	}
-	last_letter=len;
+	last_letter_in=last_letter_out=len;
 	for(i=0;comm[i]!='\0';i++)
+	{
 		if(comm[i]=='>')
 		{
-			if(comm[i-1]=='>')
-				out_red=2;
+			out_red=1;
+			comm[i]=' ';
+			if(comm[i+1]!='\0' && comm[i+1]=='>')
+			{
+				comm[i+1]=' ';
+				ret=redirect_to_file(comm,2,i+2,size);
+				if(ret)
+					return ;
+			}
 			else
 			{
-				out_red=1;
-				last_letter=i;
+				ret=redirect_to_file(comm,1,i+1,size);
+				if(ret)
+					return ;
 			}
-		}
-	
-	if(out_red)
-	{
-		ret=redirect_to_file(comm,out_red,last_letter,size);
-		if(ret)
-			return;
-	}
 
+			
+		}
+		if(comm[i]=='<')
+		{
+			in_red=1;
+			comm[i]=' ';
+			ret=redirect_from_file(comm,i+1,size);
+			if(ret)
+				return ;
+		}
+	}
 	
 	char* command=(char*)malloc((size+5)*sizeof(char));
-	for(i=0;i<last_letter;i++)
+	for(i=0;comm[i]!='\0';i++)
 		command[i]=comm[i];
 	command[i]='\0'	;
 	args=arg_break(command,bg,size);
-	
 
 	if(strncmp(command,"remindme",8)==0)
 		bg=1;
@@ -129,7 +140,7 @@ void command_execute(char* comm,int bg,int size)
 			}
 			else
 			{
-				system_command_execute(args);
+				system_command_execute(args,in_red);
 			}
 
 		}
@@ -160,7 +171,13 @@ void command_execute(char* comm,int bg,int size)
 
 		if(out_red)
 		{
-			ret=close_redirection();
+			ret=close_redirection_out();
+			if(ret)
+				return;
+		}
+		if(in_red)
+		{	
+			ret=close_redirection_in();
 			if(ret)
 				return;
 		}

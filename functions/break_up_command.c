@@ -47,7 +47,6 @@ void trim(char* arr)
 
 void break_up_command(char* comm,int no_commands,int size)
 {
-	//printf("br enter\n");
 	char** array_of_commands;
 	char* ptr;
 	char* command=(char*)malloc(size*sizeof(char));
@@ -60,6 +59,7 @@ void break_up_command(char* comm,int no_commands,int size)
 	array_of_commands[0]=strtok_r(command,";",&ptr);
 	while(array_of_commands[i]!=NULL)
 	{
+		
 		trim(array_of_commands[i]);
 		if(array_of_commands[i][strlen(array_of_commands[i])-1]=='&')
 			bg[i]=1;
