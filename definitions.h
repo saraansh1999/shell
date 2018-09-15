@@ -13,6 +13,7 @@ char root[1005];
 char relative_curr_dir[1005];
 char delim[10];
 int shell_id;
+int piping[2];
 bg_processes bgpro[1005];
 
 
@@ -48,7 +49,15 @@ int redirect_from_file(char comm[],int last_letter,int size);
 
 int close_redirection_in();
 
-void command_execute(char* comm,int bg,int size);
+int send_to_pipe(int *fd);
+
+int close_pipe_out();
+
+int receive_from_pipe(int *fd);
+
+int close_pipe_in();
+
+void command_execute(char* comm,int bg,int size,int prev,int next);
 
 void break_up_command(char* comm,int no_commands,int size);
 

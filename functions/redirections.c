@@ -6,8 +6,8 @@
 #include "../definitions.h"
 
 
-int stdout_clone;
-int stdin_clone;
+int stdout_clone_for_red,stdout_clone_for_pipe;
+int stdin_clone_for_red,stdin_clone_for_pipe;
 
 
 int redirect_to_file(char comm[],int out_red,int last_letter,int size)
@@ -44,13 +44,13 @@ int redirect_to_file(char comm[],int out_red,int last_letter,int size)
 			return 1;
 		}
 
-		/*if(dup2(1,stdout_clone)==-1)
+		/*if(dup2(1,stdout_clone_for_red)==-1)
 		{
 			printf("ERROR : Redirection Failed.\n");
 			return 1;	
 		}*/
-		stdout_clone=dup(1);
-		if(stdout_clone==-1)
+		stdout_clone_for_red=dup(1);
+		if(stdout_clone_for_red==-1)
 		{
 			printf("ERROR : Redirection Failed.\n");
 			return 1;
@@ -98,13 +98,13 @@ int redirect_from_file(char comm[],int last_letter,int size)
 		return 1;
 	}
 
-/*	if(dup2(0,stdin_clone)==-1)
+/*	if(dup2(0,stdin_clone_for_red)==-1)
 	{
 		printf("ERROR : Redirection Failed.\n");
 		return 1;
 	}*/
-	stdin_clone=dup(0);
-	if(stdin_clone==-1)
+	stdin_clone_for_red=dup(0);
+	if(stdin_clone_for_red==-1)
 	{
 		printf("ERROR : Redirection Failed.\n");
 		return 1;
@@ -124,9 +124,69 @@ int redirect_from_file(char comm[],int last_letter,int size)
 
 }
 
+int send_to_pipe(int *fd)
+{
+	stdout_clone_for_red=dup(1);
+	if(stdout_clone_for_red==-1)
+	{
+		printf("ERROR : Redirection Failed\n");
+		return 1;
+	}
+
+	if(dup2(*fd,1)==-1)
+	{
+		printf("ERROR : Redirection Failed\n");
+		return 1;
+	}
+
+	close(*fd);
+
+	return 0;
+}
+
+int receive_from_pipe(int *fd)
+{
+	stdin_clone_for_red=dup(0);
+	if(stdin_clone_for_red==-1)
+	{
+		printf("ERROR : Redirection Failed\n");
+		return 1;
+	}	
+
+	if(dup2(*fd,0)==-1)
+	{
+		printf("ERROR : Redirection Failed\n");
+		return 1;	
+	}
+
+	close(*fd);
+
+	return 0;
+}
+
+int close_pipe_out()
+{
+	if(dup2(stdout_clone_for_pipe,1)==-1)
+	{
+		printf("ERROR : Redirection Failed.\n");
+		return 1;
+	}
+	return 0;
+}
+
+int close_pipe_in()
+{
+	if(dup2(stdin_clone_for_red,0)==-1)
+	{
+		printf("ERROR : Redirection Failed.\n");
+		return 1;
+	}
+	return 0;
+}
+
 int close_redirection_out()
 {
-	if(dup2(stdout_clone,1)==-1)
+	if(dup2(stdout_clone_for_red,1)==-1)
 	{
 		printf("ERROR : Redirection Failed.\n");
 		return 1;
@@ -136,7 +196,7 @@ int close_redirection_out()
 
 int close_redirection_in()
 {
-	if(dup2(stdin_clone,0)==-1)
+	if(dup2(stdin_clone_for_red,0)==-1)
 	{
 		printf("ERROR : Redirection Failed.\n");
 		return 1;

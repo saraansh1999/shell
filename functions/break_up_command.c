@@ -47,33 +47,53 @@ void trim(char* arr)
 
 void break_up_command(char* comm,int no_commands,int size)
 {
-	char** array_of_commands;
-	char* ptr;
+	char** array_of_commands,**piped_elements;
+	char* ptr,*ptr2;
 	char* command=(char*)malloc(size*sizeof(char));
-	int i=0;
-	int* bg;
+	int i=0,j,prev,next;
+	int bg;
 	strcpy(command,comm);
 	array_of_commands=(char**)malloc((no_commands+5)*sizeof(char*));
-	bg=(int*)malloc(no_commands*sizeof(int));
-
+	piped_elements=(char**)malloc((size)*sizeof(char*));
+	
 	array_of_commands[0]=strtok_r(command,";",&ptr);
 	while(array_of_commands[i]!=NULL)
 	{
-		
+		j=0;
+
 		trim(array_of_commands[i]);
-		if(array_of_commands[i][strlen(array_of_commands[i])-1]=='&')
-			bg[i]=1;
-		else
-			bg[i]=0;
 		
-		command_execute(array_of_commands[i],bg[i],strlen(array_of_commands[i]));
+		piped_elements[0]=strtok_r(array_of_commands[i],"|",&ptr2);
+		while(piped_elements[j]!=NULL)
+		{
+			prev=0;
+			next=0;
+			trim(piped_elements[j]);
+			
+			if(piped_elements[i][strlen(piped_elements[i])-1]=='&')
+				bg=1;
+			else
+				bg=0;
+			
+			if(j>0)
+				prev=1;
+
+			j++;
+			piped_elements[j]=strtok_r(NULL,"|",&ptr2);
+			
+			if(piped_elements[j]!=NULL)
+				next=1;
+			
+			command_execute(piped_elements[j-1],bg,strlen(piped_elements[j-1]),prev,next);
+
+		}
+		
 		
 		i++;
 		array_of_commands[i]=strtok_r(NULL,";",&ptr);
 	}
 	//printf("br exit\n");
 	free(command);
-	free(bg);
 	//printf("freed\n");
 	free(array_of_commands);
 	//printf("freed\n");

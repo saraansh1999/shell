@@ -1,4 +1,4 @@
-  #include<stdio.h>
+#include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
@@ -20,7 +20,9 @@ extern char root[1005];
 extern char relative_curr_dir[1005];
 extern char delim[10];
 extern int shell_id;
+extern int piping[2];
 extern bg_processes bgpro[1005];
+
 
 
 char** arg_break(char* comm,int bg,int size)
@@ -43,10 +45,33 @@ char** arg_break(char* comm,int bg,int size)
 }
 
 
-void command_execute(char* comm,int bg,int size)
+void command_execute(char* comm,int bg,int size,int prev,int next)
 {
-	char** args=(char**)malloc((size+5)*sizeof(char*));
-	int ret,fd,pid,i=0,j,status,wpid,len=strlen(comm),out_red=0,in_red=0,last_letter_in,last_letter_out;
+	int found_error=0,ret,fd,pid,i=0,j,status,wpid,len=strlen(comm),out_red=0,in_red=0,last_letter_in,last_letter_out;
+
+	if(prev)
+	{
+		close(piping[1]);
+		close_pipe_out();
+		if(receive_from_pipe(&piping[0]))
+		{
+			found_error=1;
+			close(piping[0]);
+			close_pipe_in();
+		}
+	}
+	if(next)
+	{
+		if(pipe(piping)==-1)
+		{
+			found_error=1;
+			printf("ERROR : Piping unsuccessful\n");
+		}
+		if(send_to_pipe(&piping[1]))
+		{
+			found_error=1;
+		}
+	}
 
 	if(bg==1)
 	{
@@ -64,16 +89,18 @@ void command_execute(char* comm,int bg,int size)
 				comm[i+1]=' ';
 				ret=redirect_to_file(comm,2,i+2,size);
 				if(ret)
-					return ;
+				{
+					found_error=1;
+				}
 			}
 			else
 			{
 				ret=redirect_to_file(comm,1,i+1,size);
 				if(ret)
-					return ;
+				{
+					found_error=1;
+				}
 			}
-
-			
 		}
 		if(comm[i]=='<')
 		{
@@ -81,112 +108,126 @@ void command_execute(char* comm,int bg,int size)
 			comm[i]=' ';
 			ret=redirect_from_file(comm,i+1,size);
 			if(ret)
-				return ;
+			{
+				found_error=1 ;
+			}
 		}
 	}
 	
-	char* command=(char*)malloc((size+5)*sizeof(char));
-	for(i=0;comm[i]!='\0';i++)
-		command[i]=comm[i];
-	command[i]='\0'	;
-	args=arg_break(command,bg,size);
-
-	if(strncmp(command,"remindme",8)==0)
-		bg=1;
-
-	if(strncmp(command,"cd",2)==0 && bg==0)
+	if(!found_error)
 	{
-		cd_command_execute(args,1);
-	}
-	else if(strncmp(command,"pinfo",5)==0 && bg==0)
-	{
-		pinfo_command_execute(args,1);
-	}
-	else if(strncmp(command,"exit",4)==0)
-		close_shell=1;
-	else
-	{
-		pid=fork();
+		char** args=(char**)malloc((size+5)*sizeof(char*));
+		char* command=(char*)malloc((size+5)*sizeof(char));
+		for(i=0;comm[i]!='\0';i++)
+			command[i]=comm[i];
+		command[i]='\0'	;
+		args=arg_break(command,bg,size);
 
-		if(pid==0)
+		if(strncmp(command,"remindme",8)==0)
+			bg=1;
+
+		if(strncmp(command,"cd",2)==0 && bg==0)
 		{
-			if(strncmp(command,"cd",2)==0)
-			{
-				cd_command_execute(args,pid);
-			}
-			else if(strncmp(command,"ls",2)==0)
-			{
-				ls_command_execute(args,size+5);
-			}
-			else if(strncmp(command,"pwd",3)==0)
-			{
-				pwd_command_execute(args);
-			}
-			else if(strncmp(command,"echo",4)==0)
-			{
-				echo_command_execute(command);
-			}
-			else if(strncmp(command,"pinfo",5)==0)
-			{
-				pinfo_command_execute(args,pid);
-			}
-			else if(strncmp(command,"remindme",8)==0)
-			{
-				remindme_command_execute(args);
-			}
-			else if(strncmp(command,"clock",5)==0)
-			{
-				clock_command_execute(args);
-			}
-			else
-			{
-				system_command_execute(args,in_red);
-			}
-
+			cd_command_execute(args,1);
+		}
+		else if(strncmp(command,"pinfo",5)==0 && bg==0)
+		{
+			pinfo_command_execute(args,1);
+		}
+		else if(strncmp(command,"exit",4)==0)
+		{
+			printf("Exit!\n");
+			close_shell=1;
 		}
 		else
 		{
-			if(bg==0)
+			pid=fork();
+
+			if(pid==0)
 			{
-				do
+				if(strncmp(command,"cd",2)==0)
 				{
-					wpid=waitpid(pid,&status,WUNTRACED);
+					cd_command_execute(args,pid);
 				}
-				while (!WIFEXITED(status) && !WIFSIGNALED(status));
+				else if(strncmp(command,"ls",2)==0)
+				{
+					ls_command_execute(args,size+5);
+				}
+				else if(strncmp(command,"pwd",3)==0)
+				{
+					pwd_command_execute(args);
+				}
+				else if(strncmp(command,"echo",4)==0)
+				{
+					echo_command_execute(command);
+				}
+				else if(strncmp(command,"pinfo",5)==0)
+				{
+					pinfo_command_execute(args,pid);
+				}
+				else if(strncmp(command,"remindme",8)==0)
+				{
+					remindme_command_execute(args);
+				}
+				else if(strncmp(command,"clock",5)==0)
+				{
+					clock_command_execute(args);
+				}
+				else
+				{
+					system_command_execute(args,in_red);
+				}
+
 			}
-			if(bg==1)
+			else
 			{
-				for(i=0;i<1005;i++)
+				if(bg==0)
 				{
-					if(bgpro[i].pid==-1)
+					do
 					{
-						bgpro[i].pid=pid;
-						strcpy(bgpro[i].name,args[0]);
-						break;
+						wpid=waitpid(pid,&status,WUNTRACED);
 					}
+					while (!WIFEXITED(status) && !WIFSIGNALED(status));
 				}
-				printf("[%d]\n", pid);
+				if(bg==1)
+				{
+					for(i=0;i<1005;i++)
+					{
+						if(bgpro[i].pid==-1)
+						{
+							bgpro[i].pid=pid;
+							strcpy(bgpro[i].name,args[0]);
+							break;
+						}
+					}
+					printf("[%d]\n", pid);
+				}
 			}
 		}
 
-		if(out_red)
-		{
-			ret=close_redirection_out();
-			if(ret)
-				return;
-		}
-		if(in_red)
-		{	
-			ret=close_redirection_in();
-			if(ret)
-				return;
-		}
+		free(args);
+		//printf("freed\n");
+		free(command);
+		//printf("freed\n");
+	}
+
+	if(out_red)
+	{
+		ret=close_redirection_out();
+	}
+	if(in_red)
+	{	
+		ret=close_redirection_in();
+	}
+	if(next)
+	{
+		ret=close_pipe_out();
+	}
+	if(prev)
+	{
+		ret=close_pipe_in();
 	}
 	
-	free(args);
-	//printf("freed\n");
-	free(command);
-	//printf("freed\n");
 	return;
 
 }
