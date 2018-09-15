@@ -13,7 +13,8 @@
 * Shell supports I/O redirection.
 * Shell supports piping of commands.
 * ';' separated commands supported.
-* The commands ```ls``` ```echo``` ```pwd``` ```pinfo``` ```clock``` ```remindme``` ```cd``` ```setenv``` ```unsetenv``` are in-built in the shell.
+* The commands ```ls``` ```echo``` ```pwd``` ```pinfo``` ```clock``` ```remindme``` ```cd``` ```setenv``` ```unsetenv``` ```jobs``` are in-built in the shell.
+* Command ```jobs``` lists out all the currently running processes that are recorded by '/proc'.
 * Command ```setenv``` can be used to initialize and update environment variables.
 * Command ```unsetenv``` can be used to delete environment variables.
 * Command ```clock -t x``` supported where x is the interval after which time will be printed on screen.(Can be terminated with Ctrl+C)
