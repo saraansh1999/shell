@@ -10,6 +10,8 @@
 * Modular code
 * Shell works with the directory from where it was executed as '~'.
 * Background and foreground processes supported.
+* Shell supports I/O redirection.
+* Shell supports piping of commands.
 * ';' separated commands supported.
 * The commands ```ls``` ```echo``` ```pwd``` ```pinfo``` ```clock``` ```remindme``` ```cd``` are in-built in the shell.
 * Command ```clock -t x``` supported where x is the interval after which time will be printed on screen.(Can be terminated with Ctrl+C)
