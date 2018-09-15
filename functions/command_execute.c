@@ -134,6 +134,40 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 		{
 			pinfo_command_execute(args,1);
 		}
+		else if(strncmp(command,"setenv",6	)==0)
+		{
+			if(args[1]==NULL)
+			{
+				printf("ERROR : Too few arguements.\n");
+				return;
+			}
+			if(args[3]!=NULL)
+			{
+				printf("ERROR : Too many arguements.\n");
+				return;
+			}
+			if(args[2]!=NULL)
+			{
+				setenv(args[1],args[2],1);
+			}
+			else
+			{
+				setenv(args[1],"",1);
+			}
+
+		}
+		else if (strncmp(command,"unsetenv",8)==0)
+		{
+			if(args[1]==NULL)
+			{
+				printf("ERROR : Too few arguements.\n");
+				return;
+			}
+			for(i=1;args[i]!=NULL;i++)
+			{
+				unsetenv(args[i]);
+			}
+		}
 		else if(strncmp(command,"exit",4)==0)
 		{
 			printf("Exit!\n");
@@ -213,19 +247,19 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 
 	if(out_red)
 	{
-		ret=close_redirection_out();
+		close_redirection_out();
 	}
 	if(in_red)
 	{	
-		ret=close_redirection_in();
+		close_redirection_in();
 	}
 	if(next)
 	{
-		ret=close_pipe_out();
+		close_pipe_out();
 	}
 	if(prev)
 	{
-		ret=close_pipe_in();
+		close_pipe_in();
 	}
 	
 	return;
