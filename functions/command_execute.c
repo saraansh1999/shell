@@ -156,7 +156,7 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 			}
 
 		}
-		else if (strncmp(command,"unsetenv",8)==0)
+		else if (strncmp(command,"unsetenv	",8)==0)
 		{
 			if(args[1]==NULL)
 			{
@@ -198,6 +198,10 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 				else if(strncmp(command,"pinfo",5)==0)
 				{
 					pinfo_command_execute(args,pid);
+				}
+				else if(strncmp(command,"jobs",4)==0)
+				{
+					jobs_command_execute();
 				}
 				else if(strncmp(command,"remindme",8)==0)
 				{

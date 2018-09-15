@@ -126,8 +126,8 @@ int redirect_from_file(char comm[],int last_letter,int size)
 
 int send_to_pipe(int *fd)
 {
-	stdout_clone_for_red=dup(1);
-	if(stdout_clone_for_red==-1)
+	stdout_clone_for_pipe=dup(1);
+	if(stdout_clone_for_pipe==-1)
 	{
 		printf("ERROR : Redirection Failed\n");
 		return 1;
@@ -146,8 +146,8 @@ int send_to_pipe(int *fd)
 
 int receive_from_pipe(int *fd)
 {
-	stdin_clone_for_red=dup(0);
-	if(stdin_clone_for_red==-1)
+	stdin_clone_for_pipe=dup(0);
+	if(stdin_clone_for_pipe==-1)
 	{
 		printf("ERROR : Redirection Failed\n");
 		return 1;
@@ -176,7 +176,7 @@ int close_pipe_out()
 
 int close_pipe_in()
 {
-	if(dup2(stdin_clone_for_red,0)==-1)
+	if(dup2(stdin_clone_for_pipe,0)==-1)
 	{
 		printf("ERROR : Redirection Failed.\n");
 		return 1;

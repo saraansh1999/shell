@@ -6,6 +6,7 @@ shell : \
 			command_execute.o \
 			redirections.o \
 			cd_command_execute.o \
+			jobs_command_execute.o \
 			ls_command_execute.o \
 			pwd_command_execute.o \
 			echo_command_execute.o \
@@ -44,6 +45,8 @@ redirections.o : definitions.h functions/redirections.c
 cd_command_execute.o : definitions.h functions/cd_command_execute.c
 		$(CC) -g -c functions/cd_command_execute.c
 
+jobs_command_execute.o : definitions.h functions/jobs_command_execute.c
+		$(CC) -g -c functions/jobs_command_execute.c
 
 ls_command_execute.o : definitions.h functions/ls_command_execute.c
 		$(CC) -g -c functions/ls_command_execute.c

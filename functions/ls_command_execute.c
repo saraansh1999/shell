@@ -1,4 +1,4 @@
-#include<stdio.h>
+	#include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
@@ -96,7 +96,7 @@ void ls_command_execute(char** args,int size)
 				ret=stat(path,&info);
 				if(ret==-1)
 				{
-					fprintf(stderr,"ERROR : Cannot get info about file //%s// //%s//\n",path,this_file[j]->d_name);
+					fprintf(stderr,"ERROR : Cannot get info about file %s %s\n",path,this_file[j]->d_name);
 					exit(EXIT_FAILURE);
 				}
 				if(this_file[j]->d_name[0]=='.' && flag_a==0)

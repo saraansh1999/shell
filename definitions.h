@@ -27,6 +27,8 @@ void put_prompt();
 
 void system_command_execute(char** args,int red);
 
+void jobs_command_execute();
+
 void cd_command_execute(char** args,int pid);
 
 void ls_command_execute(char** args,int size);
