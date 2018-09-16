@@ -7,6 +7,10 @@ shell : \
 			redirections.o \
 			cd_command_execute.o \
 			jobs_command_execute.o \
+			kjob_command_execute.o \
+			fg_command_execute.o \
+			bg_command_execute.o \
+			overkill_command_execute.o \
 			ls_command_execute.o \
 			pwd_command_execute.o \
 			echo_command_execute.o \
@@ -47,6 +51,18 @@ cd_command_execute.o : definitions.h functions/cd_command_execute.c
 
 jobs_command_execute.o : definitions.h functions/jobs_command_execute.c
 		$(CC) -g -c functions/jobs_command_execute.c
+
+kjob_command_execute.o : definitions.h functions/kjob_command_execute.c
+		$(CC) -g -c functions/kjob_command_execute.c
+
+fg_command_execute.o : definitions.h functions/fg_command_execute.c
+		$(CC) -g -c functions/fg_command_execute.c
+
+bg_command_execute.o : definitions.h functions/bg_command_execute.c
+		$(CC) -g -c functions/bg_command_execute.c
+
+overkill_command_execute.o : definitions.h functions/overkill_command_execute.c
+		$(CC) -g -c functions/overkill_command_execute.c
 
 ls_command_execute.o : definitions.h functions/ls_command_execute.c
 		$(CC) -g -c functions/ls_command_execute.c

@@ -97,7 +97,7 @@ void jobs_command_execute()
 						z=0;
 						for(;buffer[j]!='\n';j++)
 							jobs[c].state[z++]=buffer[j];
-						jobs[c].state[z]='0';
+						jobs[c].state[z]='\0';
 
 					}
 					if(strncmp(buffer,"Pid",3)==0)
@@ -140,7 +140,6 @@ void jobs_command_execute()
 	qsort(jobs,c,sizeof(files),compare);
 	for(i=0;i<c;i++)
 	{
-		//printf("///////////////////////%s//////////////////\n",jobs[i].name );
 		printf("[%d]     %s     %s [%d]\n",i+1,jobs[i].state,jobs[i].name,jobs[i].pid );
 	}
 	exit(EXIT_SUCCESS);

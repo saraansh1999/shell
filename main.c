@@ -25,11 +25,15 @@ extern int shell_id;
 int main()
 {
 
-	signal(SIGINT,global_signal_handler);
+	signal(SIGINT,SIGINT_handler);
+	signal(SIGTSTP,SIGTSTP_handler);
+	signal(SIGCHLD,SIGCHLD_handler);
+	
 
 	int i;
 	getcwd(root,1000);
 	
+	curr_fg=-1	;
 	close_shell=0;
 	strcpy(delim," \t\r\n\v\f\a");
 	for(i=0;i<1005;i++)

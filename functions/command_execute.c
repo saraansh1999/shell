@@ -21,6 +21,7 @@ extern char relative_curr_dir[1005];
 extern char delim[10];
 extern int shell_id;
 extern int piping[2];
+extern int curr_fg;
 extern bg_processes bgpro[1005];
 
 
@@ -125,6 +126,8 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 
 		if(strncmp(command,"remindme",8)==0)
 			bg=1;
+		if(strncmp(command,"clock",5)==0)
+			bg=0;
 
 		if(strncmp(command,"cd",2)==0 && bg==0)
 		{
@@ -134,45 +137,20 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 		{
 			pinfo_command_execute(args,1);
 		}
-		else if(strncmp(command,"setenv",6	)==0)
+		else if(strncmp(command,"quit",4)==0)
 		{
-			if(args[1]==NULL)
-			{
-				printf("ERROR : Too few arguements.\n");
-				return;
-			}
-			if(args[3]!=NULL)
-			{
-				printf("ERROR : Too many arguements.\n");
-				return;
-			}
-			if(args[2]!=NULL)
-			{
-				setenv(args[1],args[2],1);
-			}
-			else
-			{
-				setenv(args[1],"",1);
-			}
-
-		}
-		else if (strncmp(command,"unsetenv	",8)==0)
-		{
-			if(args[1]==NULL)
-			{
-				printf("ERROR : Too few arguements.\n");
-				return;
-			}
-			for(i=1;args[i]!=NULL;i++)
-			{
-				unsetenv(args[i]);
-			}
-		}
-		else if(strncmp(command,"exit",4)==0)
-		{
-			printf("Exit!\n");
+			printf("Quitting!\n");
 			close_shell=1;
 		}
+		else if(strncmp(command,"fg",2)==0)
+		{
+			fg_command_execute(args);
+		}
+		else if(strncmp(command,"bg",2)==0)
+		{
+			bg_command_execute(args);
+		}
+		
 		else
 		{
 			pid=fork();
@@ -199,9 +177,51 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 				{
 					pinfo_command_execute(args,pid);
 				}
+				else if(strncmp(command,"setenv",6	)==0)
+				{
+					if(args[1]==NULL)
+					{
+						printf("ERROR : Too few arguements.\n");
+						return;
+					}
+					if(args[3]!=NULL)
+					{
+						printf("ERROR : Too many arguements.\n");
+						return;
+					}
+					if(args[2]!=NULL)
+					{
+						setenv(args[1],args[2],1);
+					}
+					else
+					{
+						setenv(args[1],"",1);
+					}
+
+				}
+				else if (strncmp(command,"unsetenv	",8)==0)
+				{
+					if(args[1]==NULL)
+					{
+						printf("ERROR : Too few arguements.\n");
+						return;
+					}
+					for(i=1;args[i]!=NULL;i++)
+					{
+						unsetenv(args[i]);
+					}
+				}
 				else if(strncmp(command,"jobs",4)==0)
 				{
 					jobs_command_execute();
+				}
+				else if(strncmp(command,"kjob",4)==0)
+				{
+					kjob_command_execute(args);
+				}
+				else if(strncmp(command,"overkill",8)==0)
+				{
+					overkill_command_execute();
 				}
 				else if(strncmp(command,"remindme",8)==0)
 				{
@@ -221,11 +241,18 @@ void command_execute(char* comm,int bg,int size,int prev,int next)
 			{
 				if(bg==0)
 				{
+					curr_fg=pid;
 					do
 					{
 						wpid=waitpid(pid,&status,WUNTRACED);
+						if(WIFSTOPPED(status))
+						{
+							bg=1;
+							break;
+						}
 					}
 					while (!WIFEXITED(status) && !WIFSIGNALED(status));
+					curr_fg=-1;
 				}
 				if(bg==1)
 				{

@@ -27,9 +27,9 @@ void check_bg_exit()
 {
 	int wpid,status,i;
 
-	while((wpid=waitpid(-1,&status,WNOHANG))>0)
+	while((wpid=waitpid(-1,NULL,WNOHANG))>0)
 	{
-		if(WIFEXITED(status))
+			if(WIFEXITED(status) || WIFSIGNALED(status))
 		{
 			for(i=0;i<1005;i++)
 			{

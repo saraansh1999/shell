@@ -13,11 +13,14 @@ char root[1005];
 char relative_curr_dir[1005];
 char delim[10];
 int shell_id;
+int curr_fg;
 int piping[2];
 bg_processes bgpro[1005];
 
 
-void global_signal_handler(int sig);
+void SIGINT_handler(int sig);
+
+void SIGTSTP_handler(int sig);
 
 void clock_signal_handler(int sig);
 
@@ -28,6 +31,16 @@ void put_prompt();
 void system_command_execute(char** args,int red);
 
 void jobs_command_execute();
+
+void kjob_command_execute(char** args);
+
+void fg_command_execute(char** args);
+
+void bg_command_execute(char** args);
+
+void bg_after_fg(int pid);
+
+void overkill_command_execute();
 
 void cd_command_execute(char** args,int pid);
 
