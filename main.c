@@ -26,9 +26,7 @@ int main()
 {
 
 	signal(SIGINT,SIGINT_handler);
-	signal(SIGTSTP,SIGTSTP_handler);
-	signal(SIGCHLD,SIGCHLD_handler);
-	
+	signal(SIGTSTP,SIGTSTP_handler);	
 
 	int i;
 	getcwd(root,1000);
